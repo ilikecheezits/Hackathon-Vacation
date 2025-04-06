@@ -1510,10 +1510,10 @@
                         if (hotels.length > 0) {
                             hotelHtml = `
                                 <div class="hotel-recommendations" style="margin-top: 15px; padding: 10px; background-color: #fff3cd; border-radius: 4px;">
-                                    <h4 style="margin-top: 0; color: #856404;">🏨 Hotel Recommendations in ${to}</h4>
+                                    <h4 style="margin-top: 0; color: #856404;">🏨 Hotel Recommendations in <a href="https://www.google.com/search?q=hotels+in+${encodeURIComponent(to)}" target="_blank">${to}</a></h4>
                                     ${hotels.map(hotel => `
                                         <div class="hotel-card" style="margin-bottom: 10px; padding: 10px; background-color: white; border-radius: 4px; border: 1px solid #ffeeba;">
-                                            <h5 style="margin: 0 0 5px 0;">${hotel.name}</h5>
+                                            <h5 style="margin: 0 0 5px 0;"><a href="https://www.google.com/search?q=${encodeURIComponent(hotel.name + ' ' + to)}" target="_blank">${hotel.name}</a></h5>
                                             <p style="margin: 0 0 5px 0; color: #856404;">${hotel.priceRange}</p>
                                             <p style="margin: 0 0 5px 0;">${hotel.description}</p>
                                             <p style="margin: 0; font-size: 0.9em;">
@@ -1530,8 +1530,8 @@
                         <h3>${formatDate(day.date)}</h3>
                         <div class="transition-icon">${travelModeIcon}</div>
                         <div class="transition-details">
-                            From: ${from}<br>
-                            To: ${to}<br>
+                            From: <a href="https://www.google.com/search?q=tourism+in+${encodeURIComponent(from)}" target="_blank">${from}</a><br>
+                            To: <a href="https://www.google.com/search?q=tourism+in+${encodeURIComponent(to)}" target="_blank">${to}</a><br>
                             <span class="travel-time">
                                 ${travelModeIcon} 
                                 Approximate travel time: ${travelTime} hours
@@ -1652,7 +1652,7 @@
                                     <div class="attraction-slot">
                                         <div class="attraction-time">${timeSlot.time}</div>
                                         <div class="attraction-details">
-                                            <strong>${timeSlot.attraction.name}</strong>
+                                            <strong><a href="https://www.google.com/search?q=${encodeURIComponent(timeSlot.attraction.name + ' ' + day.destination)}" target="_blank">${timeSlot.attraction.name}</a></strong>
                                             <p>${timeSlot.attraction.description}</p>
                                             <p class="attraction-tips">💡 ${timeSlot.attraction.tips}</p>
                                             <p class="attraction-duration">⏱️ Duration: ${timeSlot.attraction.duration}</p>
@@ -1664,7 +1664,7 @@
                         
                         dayElement.innerHTML = `
                             <h3>${formatDate(day.date)}</h3>
-                            <div class="schedule-location">📍 ${day.destination}</div>
+                            <div class="schedule-location">📍 <a href="https://www.google.com/search?q=tourism+in+${encodeURIComponent(day.destination)}" target="_blank">${day.destination}</a></div>
                             ${itineraryHtml}
                             <button onclick="showLocations('${day.destination}')" class="location-btn">View More Attractions</button>
                         `;
