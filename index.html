@@ -4,355 +4,441 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vacation Destination Finder</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDah6y8b7LWhNUqJkpCizcPfoIDwCM5P_k&libraries=places,geometry"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <!-- Load Google Maps API with async attribute -->
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDah6y8b7LWhNUqJkpCizcPfoIDwCM5P_k&libraries=places,geometry&callback=initGoogleMaps">
+    </script>
     <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --background-color: #f5f7fa;
+            --card-color: #ffffff;
+            --text-color: #2c3e50;
+            --border-radius: 12px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: var(--background-color);
+            background-image: url('https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            color: var(--text-color);
         }
+
         .container {
-            background-color: white;
+            background-color: rgba(255, 255, 255, 0.95);
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.5s ease-in-out;
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         h1 {
-            color: #2c3e50;
+            color: var(--primary-color);
             text-align: center;
             margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            animation: slideIn 0.5s ease-in-out;
         }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
         label {
             display: block;
-            margin-bottom: 5px;
-            color: #34495e;
-            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 1.1em;
         }
+
         input[type="date"], input[type="text"], select {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
             box-sizing: border-box;
+            font-size: 1em;
+            transition: var(--transition);
+            background-color: var(--card-color);
         }
+
+        input[type="date"]:focus, input[type="text"]:focus, select:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
         button {
-            background-color: #3498db;
+            background-color: var(--secondary-color);
             color: white;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 4px;
+            border-radius: var(--border-radius);
             cursor: pointer;
-            font-size: 16px;
+            font-size: 1em;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: var(--box-shadow);
         }
+
         button:hover {
             background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
-        #preferencesList {
-            margin-top: 20px;
-        }
-        .preference-item {
-            background-color: #f8f9fa;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 4px;
+
+        .tabs {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: none;
+            gap: 10px;
         }
-        .remove-btn {
-            background-color: #e74c3c;
-            color: white;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
+
+        .tab {
+            padding: 12px 24px;
             cursor: pointer;
+            background-color: var(--card-color);
+            border: none;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            font-weight: 600;
+            box-shadow: var(--box-shadow);
         }
-        .remove-btn:hover {
-            background-color: #c0392b;
-        }
-        #recommendations {
-            margin-top: 30px;
-        }
-        .destination-card {
+
+        .tab:hover {
             background-color: #f8f9fa;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-            border-left: 4px solid #3498db;
+            transform: translateY(-2px);
         }
-        .destination-card h3 {
-            color: #2c3e50;
-            margin-top: 0;
+
+        .tab.active {
+            background-color: var(--secondary-color);
+            color: white;
+            transform: translateY(-2px);
         }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .destination-card {
+            background-color: var(--card-color);
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+            border-left: none;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .destination-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .destination-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: var(--secondary-color);
+            transition: var(--transition);
+        }
+
+        .destination-card:hover::before {
+            width: 6px;
+        }
+
         .match-score {
             display: inline-block;
             background-color: #2ecc71;
             color: white;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 14px;
-            margin-left: 10px;
-        }
-        .activity-match {
-            margin-left: 20px;
-            color: #34495e;
-            font-style: italic;
-        }
-        .budget-indicator {
-            display: inline-block;
-            margin-left: 10px;
-            font-size: 14px;
-        }
-        .budget-low {
-            color: #27ae60;
-        }
-        .budget-medium {
-            color: #f39c12;
-        }
-        .budget-high {
-            color: #e74c3c;
-        }
-        .season-info {
-            color: #7f8c8d;
-            font-style: italic;
-            margin-top: 5px;
-        }
-        .tabs {
-            display: flex;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #ddd;
-        }
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            background-color: #f8f9fa;
-            border: 1px solid #ddd;
-            border-bottom: none;
-            border-radius: 4px 4px 0 0;
-            margin-right: 5px;
-        }
-        .tab.active {
-            background-color: white;
-            border-bottom: 1px solid white;
-            margin-bottom: -1px;
-        }
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        .destination-select {
-            margin-top: 10px;
-            padding: 10px;
-            background-color: #e8f4f8;
-            border-radius: 4px;
-        }
-        .destination-select label {
-            display: inline-block;
-            margin-right: 15px;
-        }
-        .destination-select input[type="checkbox"] {
-            margin-right: 5px;
-        }
-        .schedule-day {
-            background-color: #f8f9fa;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-            border-left: 4px solid #3498db;
-        }
-        .schedule-day h3 {
-            color: #2c3e50;
-            margin-top: 0;
-        }
-        .schedule-location {
-            color: #7f8c8d;
-            font-style: italic;
-            margin-bottom: 10px;
-        }
-        .schedule-activity {
-            margin-left: 20px;
-            color: #34495e;
-        }
-        .selected-destinations {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #e8f4f8;
-            border-radius: 4px;
-        }
-        .selected-destination-item {
-            display: inline-block;
-            background-color: #3498db;
-            color: white;
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 20px;
-            margin-right: 10px;
-            margin-bottom: 10px;
+            font-size: 0.9em;
+            margin-left: 10px;
+            animation: pulse 2s infinite;
         }
-        .selected-destination-item .remove-dest {
-            margin-left: 5px;
-            cursor: pointer;
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
+
         .transition-day {
-            background-color: #f1c40f;
+            background-color: #fff3cd;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+            border-left: none;
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .transition-day:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .hotel-recommendations {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff3cd;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .hotel-card {
+            background-color: var(--card-color);
             padding: 15px;
             margin-bottom: 15px;
-            border-radius: 4px;
-            border-left: 4px solid #f39c12;
-            text-align: center;
+            border-radius: var(--border-radius);
+            border: none;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
         }
-        .transition-day h3 {
-            color: #2c3e50;
-            margin-top: 0;
+
+        .hotel-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
         }
-        .transition-icon {
-            font-size: 24px;
-            margin: 10px 0;
-        }
-        .transition-details {
-            color: #34495e;
-            font-style: italic;
-        }
-        .travel-time {
-            font-weight: bold;
-            margin-top: 5px;
-        }
-        .region-preference {
-            margin-top: 10px;
-        }
-        .region-tags {
+
+        .attraction-slot {
+            background-color: var(--card-color);
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
             display: flex;
-            flex-wrap: wrap;
-            margin-top: 10px;
+            gap: 20px;
         }
-        .region-tag {
-            background-color: #3498db;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            margin-right: 10px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
+
+        .attraction-slot:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
         }
-        .region-tag .remove-region {
-            margin-left: 5px;
-            cursor: pointer;
+
+        .attraction-time {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: var(--secondary-color);
+            min-width: 80px;
         }
-        .travel-mode-selector {
-            margin-top: 10px;
+
+        .attraction-tips {
+            background-color: #f8f9fa;
             padding: 10px;
-            background-color: #e8f4f8;
-            border-radius: 4px;
+            border-radius: var(--border-radius);
+            margin-top: 10px;
         }
-        .travel-mode-selector label {
-            display: inline-block;
-            margin-right: 15px;
-        }
-        .travel-mode-selector input[type="radio"] {
-            margin-right: 5px;
-        }
+
         .loading {
             text-align: center;
-            padding: 20px;
+            padding: 40px;
             font-style: italic;
-            color: #7f8c8d;
+            color: var(--text-color);
+            animation: pulse 2s infinite;
         }
-        .error-message {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 4px;
-            margin: 20px 0;
+
+        a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        a:hover {
+            color: var(--accent-color);
+            text-decoration: underline;
+        }
+
+        /* Add custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+        }
+
+        .preference-item {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            margin: 5px;
+            animation: fadeIn 0.3s ease-in-out;
+            transition: var(--transition);
+        }
+
+        .preference-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .preference-item button {
+            background: none;
+            border: none;
+            color: white;
+            margin-left: 8px;
+            padding: 0 5px;
+            font-size: 1.2em;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: var(--transition);
+        }
+
+        .preference-item button:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        #preferencesList {
+            margin: 10px 0;
+            min-height: 40px;
+            padding: 5px;
+            border-radius: var(--border-radius);
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .selected-destination-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--card-color);
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            animation: slideIn 0.3s ease-in-out;
+        }
+
+        .selected-destination-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .remove-dest {
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 0 5px;
+            opacity: 0.8;
+            transition: var(--transition);
+        }
+
+        .remove-dest:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .fixed-generate-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transition: var(--transition);
+            animation: bounceIn 0.5s ease-in-out;
+            display: none;
+        }
+
+        .fixed-generate-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+            background-color: #c0392b;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        #selectedDestinationsList {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: var(--border-radius);
+            margin: 10px 0;
         }
     </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Vacation Destination Finder</h1>
-        
-        <div class="tabs">
-            <div class="tab active" onclick="showTab('preferences')">Your Preferences</div>
-            <div class="tab" onclick="showTab('recommendations')">Recommended Destinations</div>
-            <div class="tab" onclick="showTab('schedule')">Your Schedule</div>
-            <div class="tab" onclick="showTab('map')">World Map</div>
-        </div>
-        
-        <div id="preferences-tab" class="tab-content active">
-            <div class="form-group">
-                <label for="startDate">When do you want to travel?</label>
-                <input type="date" id="startDate" required>
-            </div>
-
-            <div class="form-group">
-                <label for="endDate">Until when?</label>
-                <input type="date" id="endDate" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="budget">What's your budget level?</label>
-                <select id="budget">
-                    <option value="low">Budget-friendly</option>
-                    <option value="medium" selected>Moderate</option>
-                    <option value="high">Luxury</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="preference">What activities interest you?</label>
-                <input type="text" id="preference" placeholder="e.g., beach relaxation, hiking, museums, food tours">
-                <button onclick="addPreference()">Add Activity</button>
-            </div>
-            
-            <div id="preferencesList"></div>
-            
-            <div class="form-group">
-                <label for="region">Preferred regions (optional)?</label>
-                <input type="text" id="region" placeholder="e.g., Europe, Asia, France, Japan">
-                <button onclick="addRegion()">Add Region</button>
-                <div class="region-tags" id="regionTags"></div>
-            </div>
-            
-            <div class="form-group">
-                <label for="startingCity">Where would you like to start your journey?</label>
-                <input type="text" class="form-control" id="startingCity" placeholder="Enter city, country (e.g., Tokyo, Japan)" required>
-            </div>
-            
-            <button onclick="findDestinations()" style="margin-top: 20px;">Find Destinations</button>
-        </div>
-
-        <div id="recommendations-tab" class="tab-content">
-            <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
-            <div id="recommendations">
-                <div class="row" id="cityCards"></div>
-                <div class="mt-4" id="travelTimes"></div>
-            </div>
-            
-            <div class="selected-destinations" id="selectedDestinationsContainer" style="display: none;">
-                <h3>Selected Destinations</h3>
-                <div id="selectedDestinationsList"></div>
-                <button onclick="generateSchedule()" style="margin-top: 20px;">Generate Schedule</button>
-            </div>
-        </div>
-
-        <div id="schedule-tab" class="tab-content">
-            <div id="schedule"></div>
-        </div>
-
-        <div id="map-tab" class="tab-content">
-            <h2>Your Journey Map</h2>
-            <div id="mapContainer" style="width: 100%; height: 600px;"></div>
-        </div>
-    </div>
-
     <script>
+        // Initialize Google Maps callback
+        function initGoogleMaps() {
+            console.log('Google Maps API loaded');
+            // If we're on the map tab and have destinations, initialize the map
+            if (document.querySelector('.tab.active[onclick="showTab(\'map\')"]') && window.mapDestinations) {
+                initializeMap();
+            }
+        }
+
+        // Store destinations globally for map access
+        window.mapDestinations = [];
+        
+        // Function to update the map destinations
+        function updateMapDestinations(schedule) {
+            window.mapDestinations = schedule.map(day => day.destination || day.to).filter(Boolean);
+            console.log('Updated map destinations:', window.mapDestinations);
+        }
+
         // Initialize arrays
         let preferences = [];
         let selectedDestinations = [];
@@ -445,9 +531,11 @@
             document.getElementById(`${tabName}-tab`).classList.add('active');
             document.querySelector(`.tab[onclick="showTab('${tabName}')"]`).classList.add('active');
             
-            // If showing map tab, initialize the map
+            // If showing map tab, initialize the map with a slight delay to ensure container is visible
             if (tabName === 'map' && window.mapDestinations) {
-                initializeMap();
+                setTimeout(() => {
+                    initializeMap();
+                }, 100);
             }
         }
         
@@ -476,7 +564,7 @@
                 preferenceItem.className = 'preference-item';
                 preferenceItem.innerHTML = `
                     ${preference}
-                    <button class="remove-btn" onclick="removePreference('${preference}')">Remove</button>
+                    <button onclick="removePreference('${preference}')" title="Remove activity">×</button>
                 `;
                 preferencesList.appendChild(preferenceItem);
             });
@@ -803,23 +891,35 @@
         function updateSelectedDestinations() {
             const container = document.getElementById('selectedDestinationsContainer');
             const list = document.getElementById('selectedDestinationsList');
+            const fixedButton = document.querySelector('.fixed-generate-button') || createFixedGenerateButton();
             
             if (selectedDestinations.length > 0) {
                 container.style.display = 'block';
                 list.innerHTML = '';
+                fixedButton.style.display = 'block';
                 
                 selectedDestinations.forEach(destination => {
                     const item = document.createElement('div');
                     item.className = 'selected-destination-item';
                     item.innerHTML = `
-                        ${destination}
-                        <span class="remove-dest" onclick="removeSelectedDestination('${destination}')">&times;</span>
+                        <span>${destination}</span>
+                        <span class="remove-dest" onclick="removeSelectedDestination('${destination}')" title="Remove destination">×</span>
                     `;
                     list.appendChild(item);
                 });
             } else {
                 container.style.display = 'none';
+                fixedButton.style.display = 'none';
             }
+        }
+        
+        function createFixedGenerateButton() {
+            const button = document.createElement('button');
+            button.className = 'fixed-generate-button';
+            button.innerHTML = '🚀 Generate Schedule';
+            button.onclick = generateSchedule;
+            document.body.appendChild(button);
+            return button;
         }
         
         async function generateSchedule() {
@@ -1701,36 +1801,67 @@
             return times;
         }
 
-        // Update the initializeMap function to get coordinates from Gemini API
+        // Update the initializeMap function
         async function initializeMap() {
-            // Create map container if it doesn't exist
-            if (!document.getElementById('mapContainer')) {
-                const mapContainer = document.createElement('div');
-                mapContainer.id = 'mapContainer';
-                mapContainer.style.width = '100%';
-                mapContainer.style.height = '600px';
-                document.getElementById('map-tab').appendChild(mapContainer);
-            }
-            
-            // Get user's location (home) from the starting point dropdown
-            const homeLocationName = document.getElementById('startingCity').value;
-            
-            // Initialize the map with the starting city coordinates
-            const map = new google.maps.Map(document.getElementById('mapContainer'), {
-                zoom: 2,
-                center: { lat: 0, lng: 0 }, // Temporary center, will be updated
-                mapTypeId: 'terrain'
-            });
-            
-            // Add markers and lines for each destination
-            const markers = [];
-            const bounds = new google.maps.LatLngBounds();
-            const lines = []; // Store all lines to ensure they're drawn
-            
-            // Get coordinates for the starting city using Google Maps Geocoding
-            const geocoder = new google.maps.Geocoder();
-            
             try {
+                console.log('Initializing map...'); // Debug log
+                
+                // Create map container if it doesn't exist
+                const mapTab = document.getElementById('map-tab');
+                let mapContainer = document.getElementById('mapContainer');
+                
+                if (!mapContainer) {
+                    console.log('Creating new map container...'); // Debug log
+                    mapContainer = document.createElement('div');
+                    mapContainer.id = 'mapContainer';
+                    mapContainer.style.width = '100%';
+                    mapContainer.style.height = '600px';
+                    mapContainer.style.marginTop = '20px';
+                    mapContainer.style.border = '1px solid #ccc';
+                    mapContainer.style.borderRadius = '8px';
+                    mapTab.appendChild(mapContainer);
+                }
+                
+                // Get user's location (home) from the starting point dropdown
+                const homeLocationName = document.getElementById('startingCity').value;
+                console.log('Home location:', homeLocationName); // Debug log
+                
+                // Initialize the map with default center
+                const map = new google.maps.Map(mapContainer, {
+                    zoom: 2,
+                    center: { lat: 20, lng: 0 },
+                    mapTypeId: 'terrain',
+                    mapTypeControl: true,
+                    mapTypeControlOptions: {
+                        style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+                    },
+                    zoomControl: true,
+                    zoomControlOptions: {
+                        position: google.maps.ControlPosition.RIGHT_CENTER
+                    },
+                    scaleControl: true,
+                    streetViewControl: true,
+                    fullscreenControl: true
+                });
+                
+                console.log('Map initialized'); // Debug log
+                
+                if (!window.mapDestinations || !window.mapDestinations.length) {
+                    console.log('No destinations to display'); // Debug log
+                    return;
+                }
+                
+                console.log('Destinations to map:', window.mapDestinations); // Debug log
+                
+                // Add markers and lines for each destination
+                const markers = [];
+                const bounds = new google.maps.LatLngBounds();
+                const lines = [];
+                const infoWindows = [];
+                
+                // Get coordinates for the starting city using Google Maps Geocoding
+                const geocoder = new google.maps.Geocoder();
+                
                 // First, get the home location coordinates
                 const homeResults = await new Promise((resolve, reject) => {
                     geocoder.geocode({ address: homeLocationName }, (results, status) => {
@@ -1742,32 +1873,22 @@
                 if (!homeResults[0]) throw new Error('Could not find home location');
                 
                 const homeLocation = homeResults[0].geometry.location;
+                console.log('Home coordinates:', homeLocation.toString()); // Debug log
                 
-                // Update map center to the starting city
-                map.setCenter(homeLocation);
-                map.setZoom(4);
-                
-                // Add home marker
-                const homeMarker = new google.maps.Marker({
-                    position: homeLocation,
-                    map: map,
-                    title: homeLocationName,
-                    label: "H",
-                    icon: {
-                        url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
-                    }
-                });
-                markers.push(homeMarker);
-                bounds.extend(homeLocation);
-                
-                // Process all destinations
-                const coordinates = [];
+                // Create array to store all locations with their coordinates
+                const locations = [{
+                    name: 'Home',
+                    coords: homeLocation,
+                    isHome: true
+                }];
                 
                 // Get coordinates for all destinations
                 for (const destination of window.mapDestinations) {
-                    if (destination === "Home") {
-                        coordinates.push(homeLocation);
-                    } else {
+                    if (destination === "Home") continue;
+                    
+                    console.log('Getting coordinates for:', destination); // Debug log
+                    
+                    try {
                         const results = await new Promise((resolve, reject) => {
                             geocoder.geocode({ address: destination }, (results, status) => {
                                 if (status === 'OK') resolve(results);
@@ -1776,57 +1897,124 @@
                         });
                         
                         if (results[0]) {
-                            const position = results[0].geometry.location;
-                            coordinates.push(position);
-                            
-                            // Add marker for destination
-                            const marker = new google.maps.Marker({
-                                position: position,
-                                map: map,
-                                title: destination,
-                                label: (window.mapDestinations.indexOf(destination)).toString()
+                            locations.push({
+                                name: destination,
+                                coords: results[0].geometry.location,
+                                isHome: false
                             });
-                            markers.push(marker);
-                            bounds.extend(position);
+                        }
+                    } catch (error) {
+                        console.error(`Error getting coordinates for ${destination}:`, error);
+                    }
+                }
+                
+                // Add final home location for return trip
+                locations.push({
+                    name: 'Home',
+                    coords: homeLocation,
+                    isHome: true
+                });
+                
+                // Add markers for each location
+                for (let i = 0; i < locations.length; i++) {
+                    const location = locations[i];
+                    const position = location.coords;
+                    
+                    // Create marker
+                    const marker = new google.maps.Marker({
+                        position: position,
+                        map: map,
+                        title: location.name,
+                        label: location.isHome ? 'H' : i.toString(),
+                        icon: location.isHome ? 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' : null
+                    });
+                    
+                    markers.push(marker);
+                    bounds.extend(position);
+                    
+                    // Create info window with travel time to next destination
+                    if (i < locations.length - 1) {
+                        const nextLocation = locations[i + 1];
+                        const service = new google.maps.DistanceMatrixService();
+                        
+                        try {
+                            const response = await new Promise((resolve, reject) => {
+                                service.getDistanceMatrix({
+                                    origins: [location.coords],
+                                    destinations: [nextLocation.coords],
+                                    travelMode: google.maps.TravelMode.DRIVING,
+                                    unitSystem: google.maps.UnitSystem.METRIC
+                                }, (response, status) => {
+                                    if (status === 'OK') resolve(response);
+                                    else reject(new Error('Distance Matrix failed'));
+                                });
+                            });
+                            
+                            if (response.rows[0].elements[0].status === 'OK') {
+                                const distance = response.rows[0].elements[0].distance.value / 1000; // Convert to km
+                                const flightTime = Math.round((distance / 800 + 2) * 2) / 2; // Assume 800 km/h + 2h for airport procedures
+                                
+                                const infoWindow = new google.maps.InfoWindow({
+                                    content: `
+                                        <div style="padding: 10px;">
+                                            <h3>${location.isHome ? 'Starting Point' : 'Stop ' + (i)}</h3>
+                                            <p>${location.name}</p>
+                                            <p>Next stop: ${nextLocation.name}</p>
+                                            <p>Estimated flight time: ${flightTime} hours</p>
+                                        </div>
+                                    `
+                                });
+                                
+                                infoWindows.push(infoWindow);
+                                
+                                marker.addListener('click', () => {
+                                    infoWindows.forEach(iw => iw.close());
+                                    infoWindow.open(map, marker);
+                                });
+                                
+                                // Draw line to next location
+                                const line = new google.maps.Polyline({
+                                    path: [location.coords, nextLocation.coords],
+                                    geodesic: true,
+                                    strokeColor: '#FF0000',
+                                    strokeOpacity: 0.8,
+                                    strokeWeight: 2
+                                });
+                                line.setMap(map);
+                                lines.push(line);
+                            }
+                        } catch (error) {
+                            console.error('Error calculating distance:', error);
                         }
                     }
                 }
                 
-                // Draw lines between all points
-                for (let i = 0; i < coordinates.length - 1; i++) {
-                    const line = new google.maps.Polyline({
-                        path: [coordinates[i], coordinates[i + 1]],
-                        geodesic: true,
-                        strokeColor: '#FF0000',
-                        strokeOpacity: 0.8,
-                        strokeWeight: 2
-                    });
-                    line.setMap(map);
-                    lines.push(line);
-                }
-                
-                // Draw return line from last destination to home
-                if (coordinates.length > 1) {
-                    const returnLine = new google.maps.Polyline({
-                        path: [coordinates[coordinates.length - 1], coordinates[0]],
-                        geodesic: true,
-                        strokeColor: '#FF0000',
-                        strokeOpacity: 0.8,
-                        strokeWeight: 2,
-                        strokeDashArray: [5, 5] // Make return line dashed
-                    });
-                    returnLine.setMap(map);
-                    lines.push(returnLine);
-                }
-                
-                // Fit map to show all markers
+                // Fit map to show all markers with padding
                 if (markers.length > 0) {
-                    map.fitBounds(bounds);
+                    map.fitBounds(bounds, {
+                        padding: {
+                            top: 50,
+                            right: 50,
+                            bottom: 50,
+                            left: 50
+                        }
+                    });
                 }
+                
+                console.log('Map initialization complete'); // Debug log
                 
             } catch (error) {
                 console.error('Error initializing map:', error);
-                alert('Error loading map. Please try again later.');
+                const mapContainer = document.getElementById('mapContainer');
+                if (mapContainer) {
+                    mapContainer.innerHTML = `
+                        <div style="padding: 20px; text-align: center; color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px;">
+                            <h3>Error Loading Map</h3>
+                            <p>${error.message}</p>
+                            <button onclick="initializeMap()" style="margin-top: 10px; padding: 8px 16px;">Try Again</button>
+                        </div>
+                    `;
+                }
             }
         }
 
@@ -2283,21 +2471,26 @@
         // Add the isTrainAvailable function
         async function isTrainAvailable(from, to) {
             try {
+                // Handle "Home" cases by using the starting city
+                const startingCity = document.getElementById('startingCity').value;
+                const fromCity = from === "Home" ? startingCity : from;
+                const toCity = to === "Home" ? startingCity : to;
+
                 // Get city information using Google Maps Geocoding
                 const geocoder = new google.maps.Geocoder();
                 
                 // Get coordinates for both cities
                 const fromResults = await new Promise((resolve, reject) => {
-                    geocoder.geocode({ address: from }, (results, status) => {
+                    geocoder.geocode({ address: fromCity }, (results, status) => {
                         if (status === 'OK') resolve(results);
-                        else reject(new Error(`Geocode failed for ${from}`));
+                        else reject(new Error(`Geocode failed for ${fromCity}`));
                     });
                 });
                 
                 const toResults = await new Promise((resolve, reject) => {
-                    geocoder.geocode({ address: to }, (results, status) => {
+                    geocoder.geocode({ address: toCity }, (results, status) => {
                         if (status === 'OK') resolve(results);
-                        else reject(new Error(`Geocode failed for ${to}`));
+                        else reject(new Error(`Geocode failed for ${toCity}`));
                     });
                 });
                 
@@ -2353,6 +2546,118 @@
                 return false;
             }
         }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Vacation Destination Finder</h1>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('preferences')">Your Preferences</div>
+            <div class="tab" onclick="showTab('recommendations')">Recommended Destinations</div>
+            <div class="tab" onclick="showTab('schedule')">Your Schedule</div>
+            <div class="tab" onclick="showTab('map')">World Map</div>
+        </div>
+        
+        <div id="preferences-tab" class="tab-content active">
+            <div class="form-group">
+                <label for="startDate">When do you want to travel?</label>
+                <input type="date" id="startDate" required>
+            </div>
+
+            <div class="form-group">
+                <label for="endDate">Until when?</label>
+                <input type="date" id="endDate" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="budget">What's your budget level?</label>
+                <select id="budget">
+                    <option value="low">Budget-friendly</option>
+                    <option value="medium" selected>Moderate</option>
+                    <option value="high">Luxury</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="preference">What activities interest you?</label>
+                <input type="text" id="preference" placeholder="e.g., beach relaxation, hiking, museums, food tours">
+                <button onclick="addPreference()">Add Activity</button>
+            </div>
+            
+            <div id="preferencesList"></div>
+            
+            <div class="form-group">
+                <label for="region">Preferred regions (optional)?</label>
+                <input type="text" id="region" placeholder="e.g., Europe, Asia, France, Japan">
+                <button onclick="addRegion()">Add Region</button>
+                <div class="region-tags" id="regionTags"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="startingCity">Where would you like to start your journey?</label>
+                <input type="text" class="form-control" id="startingCity" placeholder="Enter city, country (e.g., Tokyo, Japan)" required>
+            </div>
+            
+            <button onclick="findDestinations()" style="margin-top: 20px;">Find Destinations</button>
+        </div>
+
+        <div id="recommendations-tab" class="tab-content">
+            <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
+            <div id="recommendations">
+                <div class="row" id="cityCards"></div>
+                <div class="mt-4" id="travelTimes"></div>
+            </div>
+            
+            <div class="selected-destinations" id="selectedDestinationsContainer" style="display: none;">
+                <h3>Selected Destinations</h3>
+                <div id="selectedDestinationsList"></div>
+                <button onclick="generateSchedule()" style="margin-top: 20px;">Generate Schedule</button>
+            </div>
+        </div>
+
+        <div id="schedule-tab" class="tab-content">
+            <div id="schedule"></div>
+        </div>
+
+        <div id="map-tab" class="tab-content">
+            <h2>Your Journey Map</h2>
+            <div id="mapContainer" style="width: 100%; height: 600px;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Google Maps callback
+        function initGoogleMaps() {
+            console.log('Google Maps API loaded');
+            // If we're on the map tab and have destinations, initialize the map
+            if (document.querySelector('.tab.active[onclick="showTab(\'map\')"]') && window.mapDestinations) {
+                initializeMap();
+            }
+        }
+
+        // Store destinations globally for map access
+        window.mapDestinations = [];
+        
+        // Function to update the map destinations
+        function updateMapDestinations(schedule) {
+            window.mapDestinations = schedule.map(day => day.destination || day.to).filter(Boolean);
+            console.log('Updated map destinations:', window.mapDestinations);
+        }
+
+        // Rest of your JavaScript functions...
+        // (Copy all the JavaScript functions from your current working version here)
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default values
+            document.getElementById('startDate').valueAsDate = new Date();
+            
+            // Add event listeners
+            document.getElementById('generateSchedule').addEventListener('click', async function() {
+                await generateSchedule();
+            });
+        });
     </script>
 </body>
 </html>
