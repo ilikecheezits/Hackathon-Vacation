@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vacation Destination Finder</title>
+    <title>VIP (Vacation Itinerary Planner)</title>
     <!-- Load Google Maps API with async attribute -->
     <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDah6y8b7LWhNUqJkpCizcPfoIDwCM5P_k&libraries=places,geometry&callback=initGoogleMaps">
@@ -637,7 +637,10 @@
                 return;
             }
 
-            // Show loading indicator
+            // Show loading indicator in preferences tab
+            document.getElementById('preferences-loading').style.display = 'block';
+
+            // Show loading indicator in recommendations tab
             const recommendationsDiv = document.getElementById('recommendations');
             recommendationsDiv.innerHTML = '<h2>Finding Perfect Destinations</h2><div class="loading">Searching for destinations that match your preferences...</div>';
 
@@ -657,11 +660,18 @@
             } catch (error) {
                 console.error('Error getting coordinates:', error);
                 alert('Could not find the starting location. Please check the city name and try again.');
+                // Hide loading indicators
+                document.getElementById('preferences-loading').style.display = 'none';
                 return;
             }
             
             // Call Gemini API to get personalized recommendations
-            getGeminiRecommendations(preferences, budget, regions, startDate, endDate, startingCity, startingCoordinates);
+            try {
+                await getGeminiRecommendations(preferences, budget, regions, startDate, endDate, startingCity, startingCoordinates);
+            } finally {
+                // Hide loading indicator in preferences tab regardless of success/failure
+                document.getElementById('preferences-loading').style.display = 'none';
+            }
         }
 
         // Update the getGeminiRecommendations function to include coordinates
@@ -2550,7 +2560,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Vacation Destination Finder</h1>
+        <h1>VIP (Vacation Itinerary Planner)</h1>
         
         <div class="tabs">
             <div class="tab active" onclick="showTab('preferences')">Your Preferences</div>
@@ -2600,6 +2610,13 @@
             </div>
             
             <button onclick="findDestinations()" style="margin-top: 20px;">Find Destinations</button>
+
+            <div id="preferences-loading" class="loading" style="display: none; margin-top: 20px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 1.2em; color: var(--secondary-color); margin-bottom: 10px;">🔍 Finding Perfect Destinations</div>
+                    <div style="color: var(--text-color); font-style: italic;">Searching for destinations that match your preferences...</div>
+                </div>
+            </div>
         </div>
 
         <div id="recommendations-tab" class="tab-content">
