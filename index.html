@@ -6,7 +6,7 @@
     <title>VIP (Vacation Itinerary Planner)</title>
     <!-- Load Google Maps API with async attribute -->
     <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDah6y8b7LWhNUqJkpCizcPfoIDwCM5P_k&libraries=places,geometry&callback=initGoogleMaps">
+        src="https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_MAPS_API_KEY}&libraries=places,geometry&callback=initGoogleMaps">
     </script>
     <style>
         :root {
